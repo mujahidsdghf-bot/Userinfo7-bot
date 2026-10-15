@@ -1,7 +1,12 @@
 import os
 import logging
+import sqlite3
+from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
+
+# .env ఫైల్ నుండి వేరియబుల్స్ లోడ్ చేయడం
+load_dotenv()
 
 # Logging setup
 logging.basicConfig(
@@ -9,12 +14,36 @@ logging.basicConfig(
     level=logging.INFO
 )
 
-# కొత్త బాట్ టోకెన్
-BOT_TOKEN = "8948161372:AAERMx3jYYJCQg1zPtapWxmCW2QrR4bAR-s"
+# .env నుండి బాట్ టోకెన్ తీసుకోవడం
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+
+# Database Setup (SQLite - యూజర్ల వివరాలు సేవ్ చేయడానికి)
+def init_db():
+    conn = sqlite3.connect('bot_users.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            user_id INTEGER PRIMARY KEY,
+            username TEXT,
+            first_name TEXT
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+def add_user(user_id, username, first_name):
+    conn = sqlite3.connect('bot_users.db')
+    cursor = conn.cursor()
+    cursor.execute('INSERT OR IGNORE INTO users (user_id, username, first_name) VALUES (?, ?, ?)', 
+                   (user_id, username, first_name))
+    conn.commit()
+    conn.close()
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """/start కమాండ్ వచ్చినప్పుడు స్వాగత మెసేజ్ మరియు మెనూ చూపిస్తుంది."""
+    """/start కమాండ్ వచ్చినప్పుడు యూజర్‌ని డేటాబేస్‌లో సేవ్ చేసి మెనూ చూపిస్తుంది."""
     user = update.effective_user
+    add_user(user.id, user.username, user.first_name)
+    
     welcome_text = (
         f"నమస్తే {user.first_name}! 👋\n\n"
         "మా స్మార్ట్ ఆటోమేషన్ బాట్‌కు స్వాగతం! 🤖\n"
@@ -71,8 +100,8 @@ async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text = "📞 **మమ్మల్ని సంప్రదించండి:**\n\nTelegram Bot: @Userinfo7_bot"
     elif query.data == "about":
         text = (
-            "ℹ️ **Bot Status:** Fully Automated & Ready for Sale!\n"
-            "Includes: Source Code + Database + Technical Support."
+            "ℹ️ **Bot Status:** Fully Secured with .env & Database!\n"
+            "Includes: Source Code + .env config + Database + Support."
         )
     else:
         text = "చెల్లుబాటు కాని ఆప్షన్."
@@ -85,6 +114,9 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("సహాయం కోసం /start అని టైప్ చేసి మెనూ చూడండి.")
 
 if __name__ == '__main__':
+    # బాట్ స్టార్ట్ అయ్యేముందు డేటాబేస్ ఇనిషియలైజ్ అవుతుంది
+    init_db()
+    
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
@@ -92,5 +124,5 @@ if __name__ == '__main__':
     app.add_handler(CallbackQueryHandler(start, pattern="^back_home$"))
     app.add_handler(CallbackQueryHandler(button_click))
 
-    print("Bot is running...")
+    print("Secure Bot with .env is running...")
     app.run_polling()
