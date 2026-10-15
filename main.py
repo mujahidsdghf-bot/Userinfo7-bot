@@ -83,7 +83,7 @@ async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == "contact":
         text = "📞 **మమ్మల్ని సంప్రదించండి:**\n\nTelegram Bot: @Userinfo7_bot"
     elif query.data == "about":
-        text = "ℹ️ **Bot Status:** Fully Secured & Running Successfully!"
+        text = "ℹ️ **Bot Status:** Fully Secured & Running Successfully on Render!"
     else:
         text = "చెల్లుబాటు కాని ఆప్షన్."
 
@@ -100,7 +100,7 @@ def main():
         print("Error: BOT_TOKEN is missing!")
         return
 
-    # Application Build
+    # Application Build (Latest python-telegram-bot v20+ standard)
     application = Application.builder().token(BOT_TOKEN).build()
 
     application.add_handler(CommandHandler("start", start))
