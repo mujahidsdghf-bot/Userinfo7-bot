@@ -83,7 +83,7 @@ async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == "contact":
         text = "📞 **మమ్మల్ని సంప్రదించండి:**\n\nTelegram Bot: @Userinfo7_bot"
     elif query.data == "about":
-        text = "ℹ️ **Bot Status:** Fully Secured & Running on Render!"
+        text = "ℹ️ **Bot Status:** Fully Secured & Running Successfully!"
     else:
         text = "చెల్లుబాటు కాని ఆప్షన్."
 
@@ -96,7 +96,11 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def main():
     init_db()
     
-    # సరికొత్త వెర్షన్ కోసం Application.builder() వాడటం
+    if not BOT_TOKEN:
+        print("Error: BOT_TOKEN is missing!")
+        return
+
+    # Application Build
     application = Application.builder().token(BOT_TOKEN).build()
 
     application.add_handler(CommandHandler("start", start))
