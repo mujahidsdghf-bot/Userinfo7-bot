@@ -83,7 +83,7 @@ async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == "contact":
         text = "📞 **మమ్మల్ని సంప్రదించండి:**\n\nTelegram Bot: @Userinfo7_bot"
     elif query.data == "about":
-        text = "ℹ️ **Bot Status:** Fully Secured & Running Successfully on Render!"
+        text = "ℹ️ **Bot Status:** Fully Secured & Professional Source Code!"
     else:
         text = "చెల్లుబాటు కాని ఆప్షన్."
 
@@ -100,7 +100,7 @@ def main():
         print("Error: BOT_TOKEN is missing!")
         return
 
-    # Application Build (Latest standard)
+    # Application Build (v21 Standard)
     application = Application.builder().token(BOT_TOKEN).build()
 
     application.add_handler(CommandHandler("start", start))
@@ -108,7 +108,7 @@ def main():
     application.add_handler(CallbackQueryHandler(start, pattern="^back_home$"))
     application.add_handler(CallbackQueryHandler(button_click))
 
-    print("Bot is starting via run_polling...")
+    print("Bot is starting successfully...")
     application.run_polling()
 
 if __name__ == '__main__':
