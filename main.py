@@ -3,7 +3,7 @@ import logging
 import sqlite3
 from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 
 # .env ఫైల్ నుండి వేరియబుల్స్ లోడ్ చేయడం
 load_dotenv()
@@ -14,10 +14,10 @@ logging.basicConfig(
     level=logging.INFO
 )
 
-# .env నుండి బాట్ టోకెన్ తీసుకోవడం
+# టోకెన్ సెటప్
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
-# Database Setup (SQLite - యూజర్ల వివరాలు సేవ్ చేయడానికి)
+# Database Setup (SQLite)
 def init_db():
     conn = sqlite3.connect('bot_users.db')
     cursor = conn.cursor()
@@ -40,7 +40,6 @@ def add_user(user_id, username, first_name):
     conn.close()
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """/start కమాండ్ వచ్చినప్పుడు యూజర్‌ని డేటాబేస్‌లో సేవ్ చేసి మెనూ చూపిస్తుంది."""
     user = update.effective_user
     add_user(user.id, user.username, user.first_name)
     
@@ -51,7 +50,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "కింది ఆప్షన్ల నుండి మీకు కావలసినదాన్ని ఎంచుకోండి:"
     )
 
-    # Inline Keyboard Buttons (మెనూ బటన్లు)
     keyboard = [
         [
             InlineKeyboardButton("🛍️ సేవలు / ఉత్పత్తులు", callback_data="services"),
@@ -73,36 +71,19 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.callback_query.edit_message_text(welcome_text, reply_markup=reply_markup)
 
 async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """బటన్ క్లిక్ చేసినప్పుడు సమాధానం ఇస్తుంది."""
     query = update.callback_query
     await query.answer()
 
     if query.data == "services":
-        text = (
-            "🛍️ **మా సేవలు & ఉత్పత్తులు:**\n\n"
-            "• డిజిటల్ సేవలు మరియు బిజినెస్ ఆటోమేషన్\n"
-            "• ఆరోగ్య మరియు ఉత్పత్తుల సమాచారం\n\n"
-            "మరిన్ని వివరాలకు సంప్రదించండి!"
-        )
+        text = "🛍️ **మా సేవలు & ఉత్పత్తులు:**\n\n• డిజిటల్ సేవలు మరియు బిజినెస్ ఆటోమేషన్\n• ఆరోగ్య మరియు ఉత్పత్తుల సమాచారం"
     elif query.data == "subscription":
-        text = (
-            "💎 **ప్రీమియం సబ్స్క్రిప్షన్ వివరాలు:**\n\n"
-            "• డైలీ స్పెషల్ అప్‌డేట్లు మరియు ఆఫర్లు\n"
-            "• విఐపి గ్రూప్ యాక్సెస్\n\n"
-            "సబ్స్క్రిప్షన్ తీసుకోవడానికి మమ్మల్ని సంప్రదించండి."
-        )
+        text = "💎 **ప్రీమియం సబ్స్క్రిప్షన్ వివరాలు:**\n\n• డైలీ స్పెషల్ అప్‌డేట్లు మరియు ఆఫర్లు\n• విఐపి గ్రూప్ యాక్సెస్"
     elif query.data == "ads":
-        text = (
-            "📢 **ప్రకటనలు & స్పాన్సర్‌షిప్‌లు:**\n\n"
-            "మీ వ్యాపారాన్ని లేదా ఛానెల్‌ని మా బాట్ ద్వారా వేలాది మందికి ప్రమోట్ చేయాలనుకుంటే సంప్రదించండి."
-        )
+        text = "📢 **ప్రకటనలు & స్పాన్సర్‌షిప్‌లు:**\n\nమీ వ్యాపారాన్ని మా బాట్ ద్వారా ప్రమోట్ చేయాలనుకుంటే సంప్రదించండి."
     elif query.data == "contact":
         text = "📞 **మమ్మల్ని సంప్రదించండి:**\n\nTelegram Bot: @Userinfo7_bot"
     elif query.data == "about":
-        text = (
-            "ℹ️ **Bot Status:** Fully Secured with .env & Database!\n"
-            "Includes: Source Code + .env config + Database + Support."
-        )
+        text = "ℹ️ **Bot Status:** Fully Secured & Running on Render!"
     else:
         text = "చెల్లుబాటు కాని ఆప్షన్."
 
@@ -110,19 +91,21 @@ async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.edit_message_text(text, reply_markup=back_button, parse_mode="Markdown")
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """/help కమాండ్ సహాయం."""
     await update.message.reply_text("సహాయం కోసం /start అని టైప్ చేసి మెనూ చూడండి.")
 
-if __name__ == '__main__':
-    # బాట్ స్టార్ట్ అయ్యేముందు డేటాబేస్ ఇనిషియలైజ్ అవుతుంది
+def main():
     init_db()
     
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
+    # సరికొత్త వెర్షన్ కోసం Application.builder() వాడటం
+    application = Application.builder().token(BOT_TOKEN).build()
 
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("help", help_command))
-    app.add_handler(CallbackQueryHandler(start, pattern="^back_home$"))
-    app.add_handler(CallbackQueryHandler(button_click))
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("help", help_command))
+    application.add_handler(CallbackQueryHandler(start, pattern="^back_home$"))
+    application.add_handler(CallbackQueryHandler(button_click))
 
-    print("Secure Bot with .env is running...")
-    app.run_polling()
+    print("Bot is starting via run_polling...")
+    application.run_polling()
+
+if __name__ == '__main__':
+    main()
