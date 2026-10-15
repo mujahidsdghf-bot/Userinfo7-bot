@@ -100,7 +100,7 @@ def main():
         print("Error: BOT_TOKEN is missing!")
         return
 
-    # Application Build (Latest python-telegram-bot v20+ standard)
+    # Application Build (Latest standard)
     application = Application.builder().token(BOT_TOKEN).build()
 
     application.add_handler(CommandHandler("start", start))
