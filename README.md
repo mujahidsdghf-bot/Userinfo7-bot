@@ -13,3 +13,10 @@ A multi-purpose interactive Telegram bot built with Python, ready for customizat
 2. Install dependencies:
    ```bash
    pip install -r requirements.txt
+## ☁️ How to Deploy on Render (Free/Cloud Hosting)
+1. Push this code to your GitHub repository.
+2. Create a new account on [Render](https://render.com) and link GitHub.
+3. Create a **Background Worker** and select this repository.
+4. Set **Build Command**: `pip install -r requirements.txt`
+5. Set **Start Command**: `python main.py`
+6. Add `BOT_TOKEN` in Render Environment Variables. Click Deploy!
