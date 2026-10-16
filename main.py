@@ -2,6 +2,8 @@ import os
 import logging
 import sqlite3
 import asyncio
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
@@ -15,8 +17,22 @@ logging.basicConfig(
     level=logging.INFO
 )
 
-# టోకెన్ సెటప్
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+PORT = int(os.environ.get("PORT", 10000))
+
+# Render వెబ్ సర్వీస్ పోర్ట్ అవసరాలను తీర్చడానికి చిన్న వెబ్ సర్వర్
+class SimpleHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/plain")
+        self.end_headers()
+        self.wfile.write(b"Bot is active and running successfully!")
+
+def run_web_server():
+    server_address = ('0.0.0.0', PORT)
+    httpd = HTTPServer(server_address, SimpleHandler)
+    print(f"Dummy web server running on port {PORT}")
+    httpd.serve_forever()
 
 # Database Setup (SQLite)
 def init_db():
@@ -100,6 +116,10 @@ def main():
     if not BOT_TOKEN:
         print("Error: BOT_TOKEN is missing!")
         return
+
+    # వెబ్ సర్వర్ థ్రెడ్‌ను బ్యాక్‌గ్రౌండ్‌లో రన్ చేయడం
+    server_thread = threading.Thread(target=run_web_server, daemon=True)
+    server_thread.start()
 
     # Python 3.14 Compatible Event Loop Fix
     try:
