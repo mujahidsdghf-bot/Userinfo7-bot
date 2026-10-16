@@ -1,6 +1,7 @@
 import os
 import logging
 import sqlite3
+import asyncio
 from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
@@ -81,7 +82,7 @@ async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == "ads":
         text = "📢 **ప్రకటనలు & స్పాన్సర్‌షిప్‌లు:**\n\nమీ వ్యాపారాన్ని మా బాట్ ద్వారా ప్రమోట్ చేయాలనుకుంటే సంప్రదించండి."
     elif query.data == "contact":
-        text = "📞 **మమ్మల్ని సంప్రదించండి:**\n\nTelegram Bot: @Userinfo7_bot"
+        text = "📞 **మమ్మల్ని సంప్రదించండి:**\n\nTelegram Bot: @userinfo17_bot"
     elif query.data == "about":
         text = "ℹ️ **Bot Status:** Fully Secured & Professional Source Code!"
     else:
@@ -100,7 +101,14 @@ def main():
         print("Error: BOT_TOKEN is missing!")
         return
 
-    # Application Build (v21 Standard)
+    # Python 3.14 Compatible Event Loop Fix
+    try:
+        asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+    # Application Build
     application = Application.builder().token(BOT_TOKEN).build()
 
     application.add_handler(CommandHandler("start", start))
